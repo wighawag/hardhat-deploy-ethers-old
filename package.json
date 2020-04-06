@@ -1,6 +1,6 @@
 {
   "name": "buidler-ethers-v5",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Buidler plugin for ethers v5",
   "homepage": "https://github.com/wighawag/buidler-ethers-v5",
   "repository": "github:wighawag/buidler-ethers-v5",
@@ -34,7 +34,7 @@
     "@types/mocha": "^5.2.5",
     "@types/node": "^8.10.38",
     "chai": "^4.2.0",
-    "ethers": "^5.0.0-beta.180",
+    "ethers": "^5.0.0-beta.159",
     "mocha": "^5.2.0",
     "prettier": "^1.17.0",
     "source-map-support": "^0.5.12",
@@ -46,6 +46,6 @@
   },
   "peerDependencies": {
     "@nomiclabs/buidler": "^1.2.0",
-    "ethers": "^5.0.0-beta.180"
+    "ethers": "^5.0.0-beta.159"
   }
 }
