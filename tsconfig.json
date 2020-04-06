@@ -7,11 +7,11 @@
     "sourceMap": true,
     "strict": true,
     "esModuleInterop": true,
-    "typeRoots": ["../../node_modules/@types", "./@types"],
     "noEmitOnError": true,
     "outDir": "./dist",
-    "rootDirs": ["./src"]
+    "rootDirs": ["./src", "./test"]
   },
+  "exclude": ["dist", "node_modules"],
   "include": [
     "./test",
     "./src"    
