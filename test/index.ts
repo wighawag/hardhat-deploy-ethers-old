@@ -315,7 +315,7 @@ describe("Ethers plugin", function() {
     describe("Deprecated functions", function() {
       describe("signers", function() {
         it("should return the signers", async function() {
-          const sigs = await this.env.ethers.signers();
+          const sigs = await this.env.ethers.getSigners();
           assert.equal(
             await sigs[0].getAddress(),
             "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"
@@ -326,7 +326,7 @@ describe("Ethers plugin", function() {
       describe("getContract", function() {
         it("should return a contract factory", async function() {
           // It's already compiled in artifacts/
-          const contract = await this.env.ethers.getContract("Greeter");
+          const contract = await this.env.ethers.getContractFactory("Greeter");
 
           assert.containsAllKeys(contract.interface.functions, [
             "setGreeting(string)",
@@ -335,7 +335,7 @@ describe("Ethers plugin", function() {
         });
 
         it("should return a contract factory for an interface", async function() {
-          const contract = await this.env.ethers.getContract("IGreeter");
+          const contract = await this.env.ethers.getContractFactory("IGreeter");
           assert.equal(contract.bytecode, "0x");
           assert.containsAllKeys(contract.interface.functions, ["greet()"]);
         });
