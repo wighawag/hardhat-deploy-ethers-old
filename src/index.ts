@@ -5,7 +5,7 @@ import EthersT from "ethers";
 
 import { getContractAt, getContractFactory, getSigners } from "./helpers";
 
-const { Web3Provider } = EthersT.providers;
+const { Web3Provider } = EthersT.ethers.providers;
 
 function fixProvider(env: BuidlerRuntimeEnvironment) {
   // alow it to be used by ethers without any change
