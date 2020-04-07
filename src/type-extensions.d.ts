@@ -25,10 +25,6 @@ declare module "@nomiclabs/buidler/types" {
       ) => Promise<ethers.Contract>;
       getSigners: () => Promise<ethers.Signer[]>;
 
-      // Deprecated
-      getContract: (name: string) => Promise<ethers.ContractFactory>;
-      signers: () => Promise<ethers.Signer[]>;
-
       // Standard ethers properties
       Contract: typeof ethers.Contract;
       ContractFactory: typeof ethers.ContractFactory;

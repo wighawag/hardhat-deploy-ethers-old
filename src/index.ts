@@ -21,10 +21,6 @@ export default function() {
         // overloads. See: https://github.com/microsoft/TypeScript/issues/28582
         getContractFactory: getContractFactory.bind(null, env) as any,
         getContractAt: getContractAt.bind(null, env),
-
-        // Deprecated:
-        getContract: (name: string) => getContractFactory(env, name),
-        signers: () => getSigners(env)
       };
     });
   });
