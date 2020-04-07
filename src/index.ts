@@ -53,6 +53,9 @@ export default function() {
           const deployments = (env as any).deployments;
           if (deployments !== undefined) {
             const contract = deployments.get(contractName) as any;
+            if (contract === undefined) {
+              throw new Error(`No Contract deployed with name ${contractName}`);
+            }
             return getContractAt(
               env,
               contract.abi ||
@@ -61,7 +64,9 @@ export default function() {
               signer
             );
           }
-          throw new Error(`No Contract deployed with name ${contractName}`);
+          throw new Error(
+            `No Deployment Plugin Installed, try usePlugin("buidler-deploy")`
+          );
         }
       };
     });

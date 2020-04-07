@@ -1,6 +1,6 @@
 {
   "name": "buidler-ethers-v5",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Buidler plugin for ethers v5",
   "homepage": "https://github.com/wighawag/buidler-ethers-v5",
   "repository": "github:wighawag/buidler-ethers-v5",
