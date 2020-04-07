@@ -23,6 +23,10 @@ declare module "@nomiclabs/buidler/types" {
         address: string,
         signer?: ethers.Signer
       ) => Promise<ethers.Contract>;
+      getContract: (
+        name: string,
+        signer?: ethers.Signer
+      ) => Promise<ethers.Contract>;
       getSigners: () => Promise<ethers.Signer[]>;
 
       // Standard ethers properties
