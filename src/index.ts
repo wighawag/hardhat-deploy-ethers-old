@@ -45,7 +45,24 @@ export default function() {
         // We cast to any here as we hit a limitation of Function#bind and
         // overloads. See: https://github.com/microsoft/TypeScript/issues/28582
         getContractFactory: getContractFactory.bind(null, env) as any,
-        getContractAt: getContractAt.bind(null, env)
+        getContractAt: getContractAt.bind(null, env),
+        getContract: (
+          contractName: string,
+          signer?: ethers.Signer
+        ): Promise<ethers.Contract> => {
+          const deployments = (env as any).deployments;
+          if (deployments !== undefined) {
+            const contract = deployments.get(contractName) as any;
+            return getContractAt(
+              env,
+              contract.abi ||
+                (contract.contractInfo && contract.contractInfo.abi),
+              contract.address,
+              signer
+            );
+          }
+          throw new Error(`No Contract deployed with name ${contractName}`);
+        }
       };
     });
   });
