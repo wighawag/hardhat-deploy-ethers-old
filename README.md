@@ -1,24 +1,26 @@
 [![npm](https://img.shields.io/npm/v/@nomiclabs/buidler-ethers.svg)](https://www.npmjs.com/package/@nomiclabs/buidler-ethers)
 [![buidler](https://buidler.dev/buidler-plugin-badge.svg?1)](https://buidler.dev)
 
-# buidler-ethers
+# buidler-ethers-v5
 
-[Buidler](http://getbuidler.com) plugin for integration with [ethers.js](https://github.com/ethers-io/ethers.js/).
+[Buidler](http://getbuidler.com) plugin for integration with [ethers.js](https://github.com/ethers-io/ethers.js/) version 5.
 
 ## What
 
-This plugin brings to Buidler the Ethereum library `ethers.js`, which allows you to interact with the Ethereum blockchain in a simple way.
+This plugin brings to Buidler the Ethereum library `ethers.js`, version 5, which allows you to interact with the Ethereum blockchain in a simple way.
+
+it is in based on the existing effort by @nomicalbas : `@nomiclabas/buidler-ethers`
 
 ## Installation
 
 ```bash
-npm install --save-dev @nomiclabs/buidler-ethers ethers@^4.0.23
+npm install --save-dev buidler-ethers-v5 ethers@next
 ```
 
 And add the following statement to your `buidler.config.js`:
 
 ```js
-usePlugin("@nomiclabs/buidler-ethers");
+usePlugin("buidler-ethers-v5");
 ```
 
 ## Tasks
@@ -29,8 +31,8 @@ This plugin creates no additional tasks.
 
 This plugins adds an `ethers` object to the Buidler Runtime Environment.
 
-This object has the same API than `ethers.js`, with some extra Buidler-specific
-functionality.
+This object has add some extra Buidler-specific functionality.
+But contrary to `@nomiclabas/buidler-ethers` it does not add ethers field that can already be accessed via the ethers library itself as import
 
 ### Provider object
 
@@ -49,21 +51,11 @@ function getContractFactory(abi: any[], bytecode: ethers.utils.Arrayish | string
 function getContractAt(nameOrAbi: string | any[], address: string, signer?: ethers.Signer): Promise<ethers.Contract>;
 
 function getSigners() => Promise<ethers.Signer[]>;
+
+function getContractAt(deploymentName: string, signer?: ethers.Signer): Promise<ethers.Contract>;
 ```
 
 The `Contract`s and `ContractFactory`s returned by these helpers are connected to the first signer returned by `getSigners` be default.
-
-#### Deprecated helpers
-
-These helpers are also added, but deprecated:
-
-```typescript
-// Use getContractFactory instead
-function getContract(name: string): Promise<ethers.ContractFactory>;
-
-// Use getSigners instead
-function signers(): Promise<ethers.Signer[]>;
-```
 
 ## Usage
 
@@ -71,27 +63,15 @@ There are no additional steps you need to take for this plugin to work.
 
 Install it and access ethers through the Buidler Runtime Environment anywhere you need it (tasks, scripts, tests, etc). For example, in your `buidler.config.js`:
 
+It also automatically integrate with the `buidler-deploy` plugin if detected 
+
 ```js
-usePlugin("@nomiclabs/buidler-ethers");
-
-// task action function receives the Buidler Runtime Environment as second argument
-task(
-  "blockNumber",
-  "Prints the current block number",
-  async (_, { ethers }) => {
-    await ethers.provider.getBlockNumber().then(blockNumber => {
-      console.log("Current block number: " + blockNumber);
-    });
-  }
-);
-
-module.exports = {};
+...
+const contract await bre.ethers.getContract('<deploymentName>');
+...
 ```
 
-And then run `npx buidler blockNumber` to try it.
-
-Read the documentation on the [Buidler Runtime Environment](https://buidler.dev/documentation/#buidler-runtime-environment-bre) to learn how to access the BRE in different ways to use ethers.js from anywhere the BRE is accessible.
 
 ## TypeScript support
 
-You need to add this to your `tsconfig.json`'s `files` array: `"node_modules/@nomiclabs/buidler-ethers/src/type-extensions.d.ts"`
+You need to add this to your `tsconfig.json`'s `files` array: `"node_modules/buidler-ethers-v5/src/type-extensions.d.ts"`
