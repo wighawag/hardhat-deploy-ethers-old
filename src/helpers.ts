@@ -56,7 +56,7 @@ export async function getContractFactoryByName(
 
   const artifact = await readArtifact(bre.config.paths.artifacts, name);
   const bytecode = artifact.bytecode;
-  return new bre.ethers.ContractFactory(artifact.abi, bytecode, signer);
+  return new ethers.ContractFactory(artifact.abi, bytecode, signer);
 }
 
 export async function getContractFactoryByAbiAndBytecode(
@@ -70,7 +70,7 @@ export async function getContractFactoryByAbiAndBytecode(
     signer = signers[0];
   }
 
-  return new bre.ethers.ContractFactory(abi, bytecode, signer);
+  return new ethers.ContractFactory(abi, bytecode, signer);
 }
 
 export async function getContractAt(
@@ -89,5 +89,5 @@ export async function getContractAt(
     signer = signers[0];
   }
 
-  return new bre.ethers.Contract(address, nameOrAbi, signer);
+  return new ethers.Contract(address, nameOrAbi, signer);
 }
