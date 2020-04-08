@@ -40,6 +40,12 @@ export default function() {
     fixProvider(env);
     env.ethers = lazyObject(() => {
       const ethers = require("ethers");
+      // try {
+      //   // console.log("disbaling ethers warning "); // TODO make it an option
+      //   ethers.logger.Logger.setLogLevel("error");
+      // } catch (e) {
+      //   console.error("cannot disable ethers warning logs");
+      // }
       const { Web3Provider } = ethers.providers;
       return {
         provider: new Web3Provider(env.network.provider as any),
