@@ -3,7 +3,12 @@ import { lazyObject } from "@nomiclabs/buidler/plugins";
 import { BuidlerRuntimeEnvironment } from "@nomiclabs/buidler/types";
 import EthersT from "ethers";
 
-import { getContractAt, getContractFactory, getSigners } from "./helpers";
+import {
+  getContract,
+  getContractAt,
+  getContractFactory,
+  getSigners
+} from "./helpers";
 
 function fixProvider(env: BuidlerRuntimeEnvironment) {
   // alow it to be used by ethers without any change
@@ -44,29 +49,7 @@ export default function() {
         // overloads. See: https://github.com/microsoft/TypeScript/issues/28582
         getContractFactory: getContractFactory.bind(null, env, ethers) as any,
         getContractAt: getContractAt.bind(null, env, ethers),
-        getContract: (
-          contractName: string,
-          signer?: EthersT.Signer
-        ): Promise<EthersT.Contract> => {
-          const deployments = (env as any).deployments;
-          if (deployments !== undefined) {
-            const contract = deployments.get(contractName) as any;
-            if (contract === undefined) {
-              throw new Error(`No Contract deployed with name ${contractName}`);
-            }
-            return getContractAt(
-              env,
-              ethers,
-              contract.abi ||
-                (contract.contractInfo && contract.contractInfo.abi),
-              contract.address,
-              signer
-            );
-          }
-          throw new Error(
-            `No Deployment Plugin Installed, try usePlugin("buidler-deploy")`
-          );
-        }
+        getContract: getContract.bind(null, env, ethers)
       };
     });
   });
