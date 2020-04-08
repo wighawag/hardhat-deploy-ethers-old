@@ -42,8 +42,8 @@ export default function() {
         getSigners: async () => getSigners(env),
         // We cast to any here as we hit a limitation of Function#bind and
         // overloads. See: https://github.com/microsoft/TypeScript/issues/28582
-        getContractFactory: getContractFactory.bind(null, env) as any,
-        getContractAt: getContractAt.bind(null, env),
+        getContractFactory: getContractFactory.bind(null, env, ethers) as any,
+        getContractAt: getContractAt.bind(null, env, ethers),
         getContract: (
           contractName: string,
           signer?: EthersT.Signer
@@ -56,6 +56,7 @@ export default function() {
             }
             return getContractAt(
               env,
+              ethers,
               contract.abi ||
                 (contract.contractInfo && contract.contractInfo.abi),
               contract.address,

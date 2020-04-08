@@ -1,6 +1,6 @@
 import { readArtifact } from "@nomiclabs/buidler/plugins";
 import { BuidlerRuntimeEnvironment } from "@nomiclabs/buidler/types";
-import ethers from "ethers";
+import EthersT from "ethers";
 
 export async function getSigners(bre: BuidlerRuntimeEnvironment) {
   const accounts = await bre.ethers.provider.listAccounts();
@@ -11,33 +11,38 @@ export async function getSigners(bre: BuidlerRuntimeEnvironment) {
 
 export function getContractFactory(
   bre: BuidlerRuntimeEnvironment,
+  ethers: any,
   name: string,
-  signer?: ethers.Signer
-): Promise<ethers.ContractFactory>;
+  signer?: EthersT.Signer
+): Promise<EthersT.ContractFactory>;
 
 export function getContractFactory(
   bre: BuidlerRuntimeEnvironment,
+  ethers: any,
   abi: any[],
   bytecode: any | string, // TODO ethers.utils.ArrayIsh
-  signer?: ethers.Signer
-): Promise<ethers.ContractFactory>;
+  signer?: EthersT.Signer
+): Promise<EthersT.ContractFactory>;
 
 export async function getContractFactory(
   bre: BuidlerRuntimeEnvironment,
+  ethers: any,
   nameOrAbi: string | any[],
-  bytecodeOrSigner?: ethers.Signer | any | string, // TODO ethers.utils.ArrayIsh
-  signer?: ethers.Signer
+  bytecodeOrSigner?: EthersT.Signer | any | string, // TODO ethers.utils.ArrayIsh
+  signer?: EthersT.Signer
 ) {
   if (typeof nameOrAbi === "string") {
     return getContractFactoryByName(
       bre,
+      ethers,
       nameOrAbi,
-      bytecodeOrSigner as ethers.Signer | undefined
+      bytecodeOrSigner as EthersT.Signer | undefined
     );
   }
 
   return getContractFactoryByAbiAndBytecode(
     bre,
+    ethers,
     nameOrAbi,
     bytecodeOrSigner as any | string, // TODO ethers.utils.ArrayIsh
     signer
@@ -46,8 +51,9 @@ export async function getContractFactory(
 
 export async function getContractFactoryByName(
   bre: BuidlerRuntimeEnvironment,
+  ethers: any,
   name: string,
-  signer?: ethers.Signer
+  signer?: EthersT.Signer
 ) {
   if (signer === undefined) {
     const signers = await bre.ethers.getSigners();
@@ -61,9 +67,10 @@ export async function getContractFactoryByName(
 
 export async function getContractFactoryByAbiAndBytecode(
   bre: BuidlerRuntimeEnvironment,
+  ethers: any,
   abi: any[],
   bytecode: any | string, // TODO ethers.utils.ArrayIsh
-  signer?: ethers.Signer
+  signer?: EthersT.Signer
 ) {
   if (signer === undefined) {
     const signers = await bre.ethers.getSigners();
@@ -75,12 +82,18 @@ export async function getContractFactoryByAbiAndBytecode(
 
 export async function getContractAt(
   bre: BuidlerRuntimeEnvironment,
+  ethers: any,
   nameOrAbi: string | any[],
   address: string,
-  signer?: ethers.Signer
+  signer?: EthersT.Signer
 ) {
   if (typeof nameOrAbi === "string") {
-    const factory = await getContractFactoryByName(bre, nameOrAbi, signer);
+    const factory = await getContractFactoryByName(
+      bre,
+      ethers,
+      nameOrAbi,
+      signer
+    );
     return factory.attach(address);
   }
 
