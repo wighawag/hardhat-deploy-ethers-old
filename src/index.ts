@@ -1,11 +1,9 @@
 import { extendEnvironment } from "@nomiclabs/buidler/config";
 import { lazyObject } from "@nomiclabs/buidler/plugins";
 import { BuidlerRuntimeEnvironment } from "@nomiclabs/buidler/types";
-import * as ethers from "ethers";
+import EthersT from "ethers";
 
 import { getContractAt, getContractFactory, getSigners } from "./helpers";
-
-const { Web3Provider } = ethers.providers;
 
 function fixProvider(env: BuidlerRuntimeEnvironment) {
   // alow it to be used by ethers without any change
@@ -36,9 +34,9 @@ export default function() {
   extendEnvironment((env: BuidlerRuntimeEnvironment) => {
     fixProvider(env);
     env.ethers = lazyObject(() => {
-      const ethersMembers = ethers as typeof ethers;
+      const ethers = require("ethers");
+      const { Web3Provider } = ethers.providers;
       return {
-        ...ethersMembers,
         provider: new Web3Provider(env.network.provider as any),
 
         getSigners: async () => getSigners(env),
@@ -48,8 +46,8 @@ export default function() {
         getContractAt: getContractAt.bind(null, env),
         getContract: (
           contractName: string,
-          signer?: ethers.Signer
-        ): Promise<ethers.Contract> => {
+          signer?: EthersT.Signer
+        ): Promise<EthersT.Contract> => {
           const deployments = (env as any).deployments;
           if (deployments !== undefined) {
             const contract = deployments.get(contractName) as any;

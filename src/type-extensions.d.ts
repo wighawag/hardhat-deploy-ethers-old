@@ -1,6 +1,5 @@
 import "@nomiclabs/buidler/types";
 import ethers from "ethers";
-import { JsonRpcProvider } from "@ethersproject/providers";
 
 declare module "@nomiclabs/buidler/types" {
   function getContractFactory(
@@ -9,14 +8,13 @@ declare module "@nomiclabs/buidler/types" {
   ): Promise<ethers.ContractFactory>;
   function getContractFactory(
     abi: any[],
-    bytecode: any, // TODO ethers.utils.ArrayIsh
+    bytecode: any | string, // TODO ethers.utils.ArrayIsh
     signer?: ethers.Signer
   ): Promise<ethers.ContractFactory>;
 
   interface BuidlerRuntimeEnvironment {
-    ethers: { // TODO check with v5
-      provider: JsonRpcProvider;
-
+    ethers: {
+      provider: ethers.providers.Web3Provider;
       getContractFactory: typeof getContractFactory;
       getContractAt: (
         nameOrAbi: string | any[],
@@ -28,21 +26,6 @@ declare module "@nomiclabs/buidler/types" {
         signer?: ethers.Signer
       ) => Promise<ethers.Contract>;
       getSigners: () => Promise<ethers.Signer[]>;
-
-      // Standard ethers properties
-      Contract: typeof ethers.Contract;
-      ContractFactory: typeof ethers.ContractFactory;
-      VoidSigner: typeof ethers.VoidSigner;
-      Signer: typeof ethers.Signer;
-      Wallet: typeof ethers.Wallet;
-      constants: typeof ethers.constants;
-      errors: typeof ethers.errors;
-      providers: typeof ethers.providers;
-      utils: typeof ethers.utils;
-      wordlists: typeof ethers.wordlists;
-      // platform: typeof ethers.platform;
-      version: typeof ethers.version;
-      getDefaultProvider: typeof ethers.getDefaultProvider;
     };
   }
 }
