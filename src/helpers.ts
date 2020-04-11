@@ -86,7 +86,7 @@ export async function getContractFactoryByName(
   if (signer === undefined) {
     const signers = await bre.ethers.getSigners();
     signer = signers[0];
-  } else if (signer === "string") {
+  } else if (typeof signer === "string") {
     signer = _getSigner(bre, signer);
   }
 
@@ -105,7 +105,7 @@ export async function getContractFactoryByAbiAndBytecode(
   if (signer === undefined) {
     const signers = await bre.ethers.getSigners();
     signer = signers[0];
-  } else if (signer === "string") {
+  } else if (typeof signer === "string") {
     signer = _getSigner(bre, signer);
   }
 
@@ -132,7 +132,7 @@ export async function getContractAt(
   if (signer === undefined) {
     const signers = await bre.ethers.getSigners();
     signer = signers[0];
-  } else if (signer === "string") {
+  } else if (typeof signer === "string") {
     signer = _getSigner(bre, signer);
   }
 
