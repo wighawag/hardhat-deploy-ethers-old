@@ -7,7 +7,8 @@ import {
   getContract,
   getContractAt,
   getContractFactory,
-  getSigners
+  getSigners,
+  getSigner
 } from "./helpers";
 
 function fixProvider(env: BuidlerRuntimeEnvironment) {
@@ -51,6 +52,7 @@ export default function() {
         provider: new Web3Provider(env.network.provider as any),
 
         getSigners: async () => getSigners(env),
+        getSigner: getSigner.bind(null, env),
         // We cast to any here as we hit a limitation of Function#bind and
         // overloads. See: https://github.com/microsoft/TypeScript/issues/28582
         getContractFactory: getContractFactory.bind(null, env, ethers) as any,

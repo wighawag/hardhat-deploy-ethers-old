@@ -44,15 +44,17 @@ automatically connected to the selected network.
 These helpers are added to the `ethers` object:
 
 ```typescript
-function getContractFactory(name: string, signer?: ethers.Signer): Promise<ethers.ContractFactory>;
+function getContractFactory(name: string, signer?: ethers.Signer | string): Promise<ethers.ContractFactory>;
 
-function getContractFactory(abi: any[], bytecode: ethers.utils.Arrayish | string, signer?: ethers.Signer): Promise<ethers.ContractFactory>;
+function getContractFactory(abi: any[], bytecode: ethers.BytesLike, | string, signer?: ethers.Signer | string): Promise<ethers.ContractFactory>;
 
-function getContractAt(nameOrAbi: string | any[], address: string, signer?: ethers.Signer): Promise<ethers.Contract>;
+function getContractAt(nameOrAbi: string | any[], address: string, signer?: ethers.Signer | string): Promise<ethers.Contract>;
 
 function getSigners() => Promise<ethers.Signer[]>;
 
-function getContractAt(deploymentName: string, signer?: ethers.Signer): Promise<ethers.Contract>;
+function getSigner(address: string) => Promise<ethers.Signer>;
+
+function getContract(deploymentName: string, signer?: ethers.Signer | string): Promise<ethers.Contract>;
 ```
 
 The `Contract`s and `ContractFactory`s returned by these helpers are connected to the first signer returned by `getSigners` be default.
