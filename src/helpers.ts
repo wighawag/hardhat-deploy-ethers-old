@@ -163,3 +163,28 @@ export async function getContract(
     `No Deployment Plugin Installed, try usePlugin("buidler-deploy")`
   );
 }
+
+export async function getContractOrNull(
+  env: BuidlerRuntimeEnvironment,
+  ethers: any,
+  contractName: string,
+  signer?: EthersT.Signer | string
+): Promise<EthersT.Contract | null> {
+  const deployments = (env as any).deployments;
+  if (deployments !== undefined) {
+    const contract = (await deployments.get(contractName)) as any;
+    if (contract === undefined) {
+      return null;
+    }
+    return getContractAt(
+      env,
+      ethers,
+      contract.abi || (contract.contractInfo && contract.contractInfo.abi),
+      contract.address,
+      signer
+    );
+  }
+  throw new Error(
+    `No Deployment Plugin Installed, try usePlugin("buidler-deploy")`
+  );
+}

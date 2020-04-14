@@ -5,6 +5,7 @@ import EthersT from "ethers";
 
 import {
   getContract,
+  getContractOrNull,
   getContractAt,
   getContractFactory,
   getSigners,
@@ -57,7 +58,8 @@ export default function() {
         // overloads. See: https://github.com/microsoft/TypeScript/issues/28582
         getContractFactory: getContractFactory.bind(null, env, ethers) as any,
         getContractAt: getContractAt.bind(null, env, ethers),
-        getContract: getContract.bind(null, env, ethers)
+        getContract: getContract.bind(null, env, ethers),
+        getContractOrNull: getContractOrNull.bind(null, env, ethers)
       };
     });
   });

@@ -25,6 +25,10 @@ declare module "@nomiclabs/buidler/types" {
         name: string,
         signer?: ethers.Signer | string
       ) => Promise<ethers.Contract>;
+      getContractOrNull: (
+        name: string,
+        signer?: ethers.Signer | string
+      ) => Promise<ethers.Contract | null>;
       getSigners: () => Promise<ethers.Signer[]>;
       getSigner: (address: string) => Promise<ethers.Signer>;
     };
