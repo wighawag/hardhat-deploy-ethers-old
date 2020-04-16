@@ -147,7 +147,8 @@ export async function getContract(
 ): Promise<EthersT.Contract> {
   const deployments = (env as any).deployments;
   if (deployments !== undefined) {
-    const contract = (await deployments.get(contractName)) as any;
+    const get = deployments.getOrNull || deployments.get;
+    const contract = (await get(contractName)) as any;
     if (contract === undefined) {
       throw new Error(`No Contract deployed with name ${contractName}`);
     }
@@ -172,7 +173,8 @@ export async function getContractOrNull(
 ): Promise<EthersT.Contract | null> {
   const deployments = (env as any).deployments;
   if (deployments !== undefined) {
-    const contract = (await deployments.get(contractName)) as any;
+    const get = deployments.getOrNull || deployments.get;
+    const contract = (await get(contractName)) as any;
     if (contract === undefined) {
       return null;
     }
