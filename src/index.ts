@@ -1,7 +1,6 @@
 import { extendEnvironment } from "@nomiclabs/buidler/config";
 import { lazyObject } from "@nomiclabs/buidler/plugins";
 import { BuidlerRuntimeEnvironment } from "@nomiclabs/buidler/types";
-import EthersT from "ethers";
 
 import {
   getContract,
@@ -12,11 +11,10 @@ import {
   getSigner
 } from "./helpers";
 
-function fixProvider(env: BuidlerRuntimeEnvironment) {
+function fixProvider(provider: any): any {
   // alow it to be used by ethers without any change
-  const provider = env.ethereum as any;
   if (provider.sendAsync === undefined) {
-    provider.sendAsync = async (
+    provider.sendAsync = (
       req: {
         id: number;
         jsonrpc: string;
@@ -25,32 +23,24 @@ function fixProvider(env: BuidlerRuntimeEnvironment) {
       },
       callback: (error: any, result: any) => void
     ) => {
-      let result;
-      try {
-        result = await provider.send(req.method, req.params);
-      } catch (e) {
-        callback(e, null);
-        return;
-      }
-      const response = { result, id: req.id, jsonrpc: req.jsonrpc };
-      callback(null, response);
+      provider
+        .send(req.method, req.params)
+        .then((result: any) =>
+          callback(null, { result, id: req.id, jsonrpc: req.jsonrpc })
+        )
+        .catch((error: any) => callback(error, null));
     };
   }
+  return provider;
 }
+
 export default function() {
   extendEnvironment((env: BuidlerRuntimeEnvironment) => {
-    fixProvider(env);
     env.ethers = lazyObject(() => {
       const ethers = require("ethers");
-      // try {
-      //   // console.log("disbaling ethers warning "); // TODO make it an option
-      //   ethers.logger.Logger.setLogLevel("error");
-      // } catch (e) {
-      //   console.error("cannot disable ethers warning logs");
-      // }
       const { Web3Provider } = ethers.providers;
       return {
-        provider: new Web3Provider(env.network.provider as any),
+        provider: new Web3Provider(fixProvider(env.network.provider) as any),
 
         getSigners: async () => getSigners(env),
         getSigner: getSigner.bind(null, env),

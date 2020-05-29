@@ -145,24 +145,11 @@ export async function getContract(
   contractName: string,
   signer?: EthersT.Signer | string
 ): Promise<EthersT.Contract> {
-  const deployments = (env as any).deployments;
-  if (deployments !== undefined) {
-    const get = deployments.getOrNull || deployments.get;
-    const contract = (await get(contractName)) as any;
-    if (contract === undefined) {
-      throw new Error(`No Contract deployed with name ${contractName}`);
-    }
-    return getContractAt(
-      env,
-      ethers,
-      contract.abi || (contract.contractInfo && contract.contractInfo.abi),
-      contract.address,
-      signer
-    );
+  const contract = await getContractOrNull(env, ethers, contractName, signer);
+  if (contract === null) {
+    throw new Error(`No Contract deployed with name ${contractName}`);
   }
-  throw new Error(
-    `No Deployment Plugin Installed, try usePlugin("buidler-deploy")`
-  );
+  return contract;
 }
 
 export async function getContractOrNull(
@@ -173,7 +160,7 @@ export async function getContractOrNull(
 ): Promise<EthersT.Contract | null> {
   const deployments = (env as any).deployments;
   if (deployments !== undefined) {
-    const get = deployments.getOrNull || deployments.get;
+    const get = deployments.getOrNull || deployments.get; // fallback for older version of buidler-deploy // TODO remove on 1.0.0
     const contract = (await get(contractName)) as any;
     if (contract === undefined) {
       return null;
@@ -181,7 +168,7 @@ export async function getContractOrNull(
     return getContractAt(
       env,
       ethers,
-      contract.abi || (contract.contractInfo && contract.contractInfo.abi),
+      contract.abi || (contract.contractInfo && contract.contractInfo.abi), // fallback for older version of buidler-deploy // TODO remove on 1.0.0
       contract.address,
       signer
     );
