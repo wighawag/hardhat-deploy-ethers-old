@@ -14,7 +14,7 @@ it is in based on the existing effort by @nomicalbas : `@nomiclabas/buidler-ethe
 ## Installation
 
 ```bash
-npm install --save-dev buidler-ethers-v5 ethers@next
+npm install --save-dev buidler-ethers-v5 ethers
 ```
 
 And add the following statement to your `buidler.config.js`:
