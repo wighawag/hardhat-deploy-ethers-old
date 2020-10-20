@@ -1,5 +1,4 @@
-import { readArtifact } from "@nomiclabs/buidler/plugins";
-import { Artifact } from "@nomiclabs/buidler/types";
+import { Artifact } from "hardhat/types";
 import { assert } from "chai";
 import { ethers } from "ethers";
 import path from "path";
@@ -9,8 +8,8 @@ import { useEnvironment } from "./helpers";
 describe("Ethers plugin", function() {
   useEnvironment(path.join(__dirname, "buidler-project"));
 
-  describe("BRE extensions", function() {
-    it("should extend buidler runtime environment", function() {
+  describe("HRE extensions", function() {
+    it("should extend hardhat runtime environment", function() {
       assert.isDefined(this.env.ethers);
       assert.containsAllKeys(this.env.ethers, [
         "provider",
@@ -38,13 +37,11 @@ describe("Ethers plugin", function() {
 
     beforeEach(async function() {
       signers = await this.env.ethers.getSigners();
-      greeterArtifact = await readArtifact(
-        this.env.config.paths.artifacts,
+      greeterArtifact = await this.env.artifacts.readArtifact(
         "Greeter"
       );
 
-      iGreeterArtifact = await readArtifact(
-        this.env.config.paths.artifacts,
+      iGreeterArtifact = await this.env.artifacts.readArtifact(
         "IGreeter"
       );
     });

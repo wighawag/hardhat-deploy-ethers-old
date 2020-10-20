@@ -1,55 +1,54 @@
-import { readArtifact } from "@nomiclabs/buidler/plugins";
 import {
-  BuidlerRuntimeEnvironment,
+  HardhatRuntimeEnvironment,
   Artifact,
   NetworkConfig
-} from "@nomiclabs/buidler/types";
+} from "hardhat/types";
 import EthersT, { BigNumber } from "ethers";
 
-export async function getSigners(bre: BuidlerRuntimeEnvironment) {
-  const accounts = await bre.ethers.provider.listAccounts();
+export async function getSigners(hre: HardhatRuntimeEnvironment) {
+  const accounts = await hre.ethers.provider.listAccounts();
   return accounts.map((account: string) =>
-    bre.ethers.provider.getSigner(account)
+    hre.ethers.provider.getSigner(account)
   );
 }
 
 function _getSigner(
-  bre: BuidlerRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment,
   signer: EthersT.Signer | string
 ): EthersT.Signer {
   if (typeof signer === "string") {
-    return bre.ethers.provider.getSigner(signer);
+    return hre.ethers.provider.getSigner(signer);
   }
   return signer;
 }
 
 async function _getArtifact(
-  bre: BuidlerRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment,
   name: string
 ): Promise<Artifact> {
-  const deployments = (bre as any).deployments;
+  const deployments = (hre as any).deployments;
   if (deployments !== undefined) {
     return deployments.getArtifact(name);
   }
-  return readArtifact(bre.config.paths.artifacts, name);
+  return hre.artifacts.readArtifact(name);
 }
 
 export async function getSigner(
-  bre: BuidlerRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment,
   address: string
 ) {
-  return _getSigner(bre, address);
+  return _getSigner(hre, address);
 }
 
 export function getContractFactory(
-  bre: BuidlerRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment,
   ethers: any,
   name: string,
   signer?: EthersT.Signer | string
 ): Promise<EthersT.ContractFactory>;
 
 export function getContractFactory(
-  bre: BuidlerRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment,
   ethers: any,
   abi: any[],
   bytecode: EthersT.BytesLike,
@@ -57,7 +56,7 @@ export function getContractFactory(
 ): Promise<EthersT.ContractFactory>;
 
 export async function getContractFactory(
-  bre: BuidlerRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment,
   ethers: any,
   nameOrAbi: string | any[],
   bytecodeOrSigner?: EthersT.Signer | EthersT.BytesLike,
@@ -65,7 +64,7 @@ export async function getContractFactory(
 ) {
   if (typeof nameOrAbi === "string") {
     return getContractFactoryByName(
-      bre,
+      hre,
       ethers,
       nameOrAbi,
       bytecodeOrSigner as EthersT.Signer | string | undefined
@@ -73,7 +72,7 @@ export async function getContractFactory(
   }
 
   return getContractFactoryByAbiAndBytecode(
-    bre,
+    hre,
     ethers,
     nameOrAbi,
     bytecodeOrSigner as EthersT.BytesLike,
@@ -82,50 +81,50 @@ export async function getContractFactory(
 }
 
 export async function getContractFactoryByName(
-  bre: BuidlerRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment,
   ethers: any,
   name: string,
   signer?: EthersT.Signer | string
 ) {
   if (signer === undefined) {
-    const signers = await bre.ethers.getSigners();
+    const signers = await hre.ethers.getSigners();
     signer = signers[0];
   } else if (typeof signer === "string") {
-    signer = _getSigner(bre, signer);
+    signer = _getSigner(hre, signer);
   }
 
-  const artifact = await _getArtifact(bre, name);
+  const artifact = await _getArtifact(hre, name);
   const bytecode = artifact.bytecode;
   const abiWithAddedGas = addGasToAbiMethodsIfNecessary(
-    bre.network.config,
+    hre.network.config,
     artifact.abi
   );
   return new ethers.ContractFactory(abiWithAddedGas, bytecode, signer);
 }
 
 export async function getContractFactoryByAbiAndBytecode(
-  bre: BuidlerRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment,
   ethers: any,
   abi: any[],
   bytecode: EthersT.BytesLike,
   signer?: EthersT.Signer | string
 ) {
   if (signer === undefined) {
-    const signers = await bre.ethers.getSigners();
+    const signers = await hre.ethers.getSigners();
     signer = signers[0];
   } else if (typeof signer === "string") {
-    signer = _getSigner(bre, signer);
+    signer = _getSigner(hre, signer);
   }
 
   const abiWithAddedGas = addGasToAbiMethodsIfNecessary(
-    bre.network.config,
+    hre.network.config,
     abi
   );
   return new ethers.ContractFactory(abiWithAddedGas, bytecode, signer);
 }
 
 export async function getContractAt(
-  bre: BuidlerRuntimeEnvironment,
+  hre: HardhatRuntimeEnvironment,
   ethers: any,
   nameOrAbi: string | any[],
   address: string,
@@ -133,7 +132,7 @@ export async function getContractAt(
 ) {
   if (typeof nameOrAbi === "string") {
     const factory = await getContractFactoryByName(
-      bre,
+      hre,
       ethers,
       nameOrAbi,
       signer
@@ -142,21 +141,21 @@ export async function getContractAt(
   }
 
   if (signer === undefined) {
-    const signers = await bre.ethers.getSigners();
+    const signers = await hre.ethers.getSigners();
     signer = signers[0];
   } else if (typeof signer === "string") {
-    signer = _getSigner(bre, signer);
+    signer = _getSigner(hre, signer);
   }
 
   const abiWithAddedGas = addGasToAbiMethodsIfNecessary(
-    bre.network.config,
+    hre.network.config,
     nameOrAbi
   );
   return new ethers.Contract(address, abiWithAddedGas, signer);
 }
 
 export async function getContract(
-  env: BuidlerRuntimeEnvironment,
+  env: HardhatRuntimeEnvironment,
   ethers: any,
   contractName: string,
   signer?: EthersT.Signer | string
@@ -169,7 +168,7 @@ export async function getContract(
 }
 
 export async function getContractOrNull(
-  env: BuidlerRuntimeEnvironment,
+  env: HardhatRuntimeEnvironment,
   ethers: any,
   contractName: string,
   signer?: EthersT.Signer | string

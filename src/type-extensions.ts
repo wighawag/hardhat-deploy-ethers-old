@@ -1,7 +1,8 @@
-import "@nomiclabs/buidler/types";
+import "hardhat/types/runtime";
+import "hardhat/types/config";
 import ethers from "ethers";
 
-declare module "@nomiclabs/buidler/types" {
+declare module "hardhat/types/runtime" {
   function getContractFactory(
     name: string,
     signer?: ethers.Signer | string
@@ -12,7 +13,7 @@ declare module "@nomiclabs/buidler/types" {
     signer?: ethers.Signer | string
   ): Promise<ethers.ContractFactory>;
 
-  interface BuidlerRuntimeEnvironment {
+  export interface HardhatRuntimeEnvironment {
     ethers: {
       provider: ethers.providers.Web3Provider;
       getContractFactory: typeof getContractFactory;
