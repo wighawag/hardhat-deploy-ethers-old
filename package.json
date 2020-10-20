@@ -1,12 +1,12 @@
 {
   "name": "buidler-ethers-v5",
-  "version": "0.3.0-hardhat.0",
+  "version": "0.3.0-hardhat.1",
   "description": "Hardhat plugin for ethers v5",
   "homepage": "https://github.com/wighawag/buidler-ethers-v5",
   "repository": "github:wighawag/buidler-ethers-v5",
   "license": "MIT",
   "main": "dist/src/index.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/src/index.d.ts",
   "keywords": [
     "ethereum",
     "smart-contracts",
