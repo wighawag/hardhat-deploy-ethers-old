@@ -1,25 +1,41 @@
+import type { ethers } from "ethers";
+import { NomicLabsHardhatPluginError } from "hardhat/plugins";
 import {
-  HardhatRuntimeEnvironment,
   Artifact,
-  NetworkConfig
+  HardhatRuntimeEnvironment,
+  NetworkConfig,
 } from "hardhat/types";
-import EthersT, { BigNumber } from "ethers";
 
-export async function getSigners(hre: HardhatRuntimeEnvironment) {
-  const accounts = await hre.ethers.provider.listAccounts();
-  return accounts.map((account: string) =>
-    hre.ethers.provider.getSigner(account)
-  );
+import type { SignerWithAddress } from "./signer-with-address";
+
+interface Link {
+  sourceName: string;
+  libraryName: string;
+  address: string;
 }
 
-function _getSigner(
+export interface Libraries {
+  [libraryName: string]: string;
+}
+
+export interface FactoryOptions {
+  signer?: ethers.Signer;
+  libraries?: Libraries;
+}
+
+const pluginName = "buidler-ethers-v5";
+
+async function _getSigner(
   hre: HardhatRuntimeEnvironment,
-  signer: EthersT.Signer | string
-): EthersT.Signer {
+  signer: ethers.Signer | string
+): Promise<SignerWithAddress> {
+  const { SignerWithAddress: SignerWithAddressImpl } = await import(
+    "./signer-with-address"
+  );
   if (typeof signer === "string") {
-    return hre.ethers.provider.getSigner(signer);
+    return SignerWithAddressImpl.create(hre.ethers.provider.getSigner(signer));
   }
-  return signer;
+  return SignerWithAddressImpl.create(signer);
 }
 
 async function _getArtifact(
@@ -40,103 +56,244 @@ export async function getSigner(
   return _getSigner(hre, address);
 }
 
-export function getContractFactory(
-  hre: HardhatRuntimeEnvironment,
-  ethers: any,
-  name: string,
-  signer?: EthersT.Signer | string
-): Promise<EthersT.ContractFactory>;
+export async function getSigners(
+  hre: HardhatRuntimeEnvironment
+): Promise<SignerWithAddress[]> {
+  const { SignerWithAddress: SignerWithAddressImpl } = await import(
+    "./signer-with-address"
+  );
+
+  const accounts = await hre.ethers.provider.listAccounts();
+  const signers = accounts.map((account: string) =>
+    hre.ethers.provider.getSigner(account)
+  );
+
+  const signersWithAddress = await Promise.all(
+    signers.map(SignerWithAddressImpl.create)
+  );
+
+  return signersWithAddress;
+}
 
 export function getContractFactory(
   hre: HardhatRuntimeEnvironment,
-  ethers: any,
+  name: string,
+  signerOrOptions?: ethers.Signer | string | FactoryOptions
+): Promise<ethers.ContractFactory>;
+
+export function getContractFactory(
+  hre: HardhatRuntimeEnvironment,
   abi: any[],
-  bytecode: EthersT.BytesLike,
-  signer?: EthersT.Signer | string
-): Promise<EthersT.ContractFactory>;
+  bytecode: ethers.utils.BytesLike,
+  signer?: ethers.Signer | string
+): Promise<ethers.ContractFactory>;
 
 export async function getContractFactory(
   hre: HardhatRuntimeEnvironment,
-  ethers: any,
   nameOrAbi: string | any[],
-  bytecodeOrSigner?: EthersT.Signer | EthersT.BytesLike,
-  signer?: EthersT.Signer | string
+  bytecodeOrFactoryOptions?:
+    | (ethers.Signer | string | FactoryOptions)
+    | ethers.utils.BytesLike,
+  signer?: ethers.Signer | string
 ) {
   if (typeof nameOrAbi === "string") {
-    return getContractFactoryByName(
+    const contractFactory = await getContractFactoryByName(
       hre,
-      ethers,
       nameOrAbi,
-      bytecodeOrSigner as EthersT.Signer | string | undefined
+      bytecodeOrFactoryOptions as ethers.Signer | string | FactoryOptions | undefined
     );
+
+    if (contractFactory.bytecode === "0x") {
+      throw new NomicLabsHardhatPluginError(
+        pluginName,
+        `You are trying to create a contract factory for the contract ${nameOrAbi}, which is abstract and can't be deployed.
+If you want to call a contract using ${nameOrAbi} as its interface use the "getContractAt" function instead.`
+      );
+    }
+
+    return contractFactory;
   }
 
   return getContractFactoryByAbiAndBytecode(
     hre,
-    ethers,
     nameOrAbi,
-    bytecodeOrSigner as EthersT.BytesLike,
+    bytecodeOrFactoryOptions as ethers.utils.BytesLike,
     signer
   );
 }
 
-export async function getContractFactoryByName(
-  hre: HardhatRuntimeEnvironment,
-  ethers: any,
-  name: string,
-  signer?: EthersT.Signer | string
-) {
-  if (signer === undefined) {
-    const signers = await hre.ethers.getSigners();
-    signer = signers[0];
-  } else if (typeof signer === "string") {
-    signer = _getSigner(hre, signer);
+function isFactoryOptions(
+  signerOrOptions?: ethers.Signer | string | FactoryOptions
+): signerOrOptions is FactoryOptions {
+  const { Signer } = require("ethers") as typeof ethers;
+  if (signerOrOptions === undefined || signerOrOptions instanceof Signer) {
+    return false;
   }
 
-  const artifact = await _getArtifact(hre, name);
-  const bytecode = artifact.bytecode;
-  const abiWithAddedGas = addGasToAbiMethodsIfNecessary(
-    hre.network.config,
-    artifact.abi
+  return true;
+}
+
+async function getContractFactoryByName(
+  hre: HardhatRuntimeEnvironment,
+  contractName: string,
+  signerOrOptions?: ethers.Signer | string | FactoryOptions
+) {
+  const { utils } = require("ethers") as typeof ethers;
+
+  const artifact = await _getArtifact(hre, contractName);
+
+  const neededLibraries: Array<{
+    sourceName: string;
+    libName: string;
+  }> = [];
+  for (const [sourceName, sourceLibraries] of Object.entries(
+    artifact.linkReferences
+  )) {
+    for (const libName of Object.keys(sourceLibraries)) {
+      neededLibraries.push({ sourceName, libName });
+    }
+  }
+
+  let signer: ethers.Signer | undefined | string;
+  let libraries: Libraries = {};
+  if (isFactoryOptions(signerOrOptions)) {
+    signer = signerOrOptions.signer;
+    libraries = signerOrOptions.libraries ?? {};
+  } else {
+    signer = signerOrOptions;
+  }
+
+  const linksToApply: Map<string, Link> = new Map();
+  for (const [linkedLibraryName, linkedLibraryAddress] of Object.entries(
+    libraries
+  )) {
+    if (!utils.isAddress(linkedLibraryAddress)) {
+      throw new NomicLabsHardhatPluginError(
+        pluginName,
+        `You tried to link the contract ${contractName} with the library ${linkedLibraryName}, but provided this invalid address: ${linkedLibraryAddress}`
+      );
+    }
+
+    const matchingNeededLibraries = neededLibraries.filter((lib) => {
+      return (
+        lib.libName === linkedLibraryName ||
+        `${lib.sourceName}:${lib.libName}` === linkedLibraryName
+      );
+    });
+
+    if (matchingNeededLibraries.length === 0) {
+      let detailedMessage: string;
+      if (neededLibraries.length > 0) {
+        const libraryFQNames = neededLibraries
+          .map((lib) => `${lib.sourceName}:${lib.libName}`)
+          .map((x) => `* ${x}`)
+          .join("\n");
+        detailedMessage = `The libraries needed are:
+${libraryFQNames}`;
+      } else {
+        detailedMessage = "This contract doesn't need linking any libraries.";
+      }
+      throw new NomicLabsHardhatPluginError(
+        pluginName,
+        `You tried to link the contract ${contractName} with ${linkedLibraryName}, which is not one of its libraries.
+${detailedMessage}`
+      );
+    }
+
+    if (matchingNeededLibraries.length > 1) {
+      const matchingNeededLibrariesFQNs = matchingNeededLibraries
+        .map(({ sourceName, libName }) => `${sourceName}:${libName}`)
+        .map((x) => `* ${x}`)
+        .join("\n");
+      throw new NomicLabsHardhatPluginError(
+        pluginName,
+        `The library name ${linkedLibraryName} is ambiguous for the contract ${contractName}.
+It may resolve to one of the following libraries:
+${matchingNeededLibrariesFQNs}
+
+To fix this, choose one of these fully qualified library names and replace where appropriate.`
+      );
+    }
+
+    const [neededLibrary] = matchingNeededLibraries;
+
+    const neededLibraryFQN = `${neededLibrary.sourceName}:${neededLibrary.libName}`;
+
+    // The only way for this library to be already mapped is
+    // for it to be given twice in the libraries user input:
+    // once as a library name and another as a fully qualified library name.
+    if (linksToApply.has(neededLibraryFQN)) {
+      throw new NomicLabsHardhatPluginError(
+        pluginName,
+        `The library names ${neededLibrary.libName} and ${neededLibraryFQN} refer to the same library and were given as two separate library links.
+Remove one of them and review your library links before proceeding.`
+      );
+    }
+
+    linksToApply.set(neededLibraryFQN, {
+      sourceName: neededLibrary.sourceName,
+      libraryName: neededLibrary.libName,
+      address: linkedLibraryAddress,
+    });
+  }
+
+  if (linksToApply.size < neededLibraries.length) {
+    const missingLibraries = neededLibraries
+      .map((lib) => `${lib.sourceName}:${lib.libName}`)
+      .filter((libFQName) => !linksToApply.has(libFQName))
+      .map((x) => `* ${x}`)
+      .join("\n");
+
+    throw new NomicLabsHardhatPluginError(
+      pluginName,
+      `The contract ${contractName} is missing links for the following libraries:
+${missingLibraries}`
+    );
+  }
+
+  const linkedBytecode = linkBytecode(artifact, [...linksToApply.values()]);
+
+  return getContractFactoryByAbiAndBytecode(
+    hre,
+    artifact.abi,
+    linkedBytecode,
+    signer
   );
-  return new ethers.ContractFactory(abiWithAddedGas, bytecode, signer);
 }
 
 export async function getContractFactoryByAbiAndBytecode(
   hre: HardhatRuntimeEnvironment,
-  ethers: any,
   abi: any[],
-  bytecode: EthersT.BytesLike,
-  signer?: EthersT.Signer | string
+  bytecode: ethers.utils.BytesLike,
+  signer?: ethers.Signer | string
 ) {
+  const { ContractFactory } = require("ethers") as typeof ethers;
+
   if (signer === undefined) {
     const signers = await hre.ethers.getSigners();
     signer = signers[0];
   } else if (typeof signer === "string") {
-    signer = _getSigner(hre, signer);
+    signer = await _getSigner(hre, signer);
   }
 
   const abiWithAddedGas = addGasToAbiMethodsIfNecessary(
     hre.network.config,
     abi
   );
-  return new ethers.ContractFactory(abiWithAddedGas, bytecode, signer);
+
+  return new ContractFactory(abiWithAddedGas, bytecode, signer);
 }
 
 export async function getContractAt(
   hre: HardhatRuntimeEnvironment,
-  ethers: any,
   nameOrAbi: string | any[],
   address: string,
-  signer?: EthersT.Signer | string
+  signer?: ethers.Signer | string
 ) {
+  const { Contract } = require("ethers") as typeof ethers;
+
   if (typeof nameOrAbi === "string") {
-    const factory = await getContractFactoryByName(
-      hre,
-      ethers,
-      nameOrAbi,
-      signer
-    );
+    const factory = await getContractFactoryByName(hre, nameOrAbi, signer);
     return factory.attach(address);
   }
 
@@ -144,23 +301,23 @@ export async function getContractAt(
     const signers = await hre.ethers.getSigners();
     signer = signers[0];
   } else if (typeof signer === "string") {
-    signer = _getSigner(hre, signer);
+    signer = await _getSigner(hre, signer);
   }
 
   const abiWithAddedGas = addGasToAbiMethodsIfNecessary(
     hre.network.config,
     nameOrAbi
   );
-  return new ethers.Contract(address, abiWithAddedGas, signer);
+
+  return new Contract(address, abiWithAddedGas, signer);
 }
 
 export async function getContract(
   env: HardhatRuntimeEnvironment,
-  ethers: any,
   contractName: string,
-  signer?: EthersT.Signer | string
-): Promise<EthersT.Contract> {
-  const contract = await getContractOrNull(env, ethers, contractName, signer);
+  signer?: ethers.Signer | string
+): Promise<ethers.Contract> {
+  const contract = await getContractOrNull(env, contractName, signer);
   if (contract === null) {
     throw new Error(`No Contract deployed with name ${contractName}`);
   }
@@ -169,27 +326,19 @@ export async function getContract(
 
 export async function getContractOrNull(
   env: HardhatRuntimeEnvironment,
-  ethers: any,
   contractName: string,
-  signer?: EthersT.Signer | string
-): Promise<EthersT.Contract | null> {
+  signer?: ethers.Signer | string
+): Promise<ethers.Contract | null> {
   const deployments = (env as any).deployments;
   if (deployments !== undefined) {
-    const get = deployments.getOrNull || deployments.get; // fallback for older version of buidler-deploy // TODO remove on 1.0.0
+    const get = deployments.getOrNull;
     const contract = (await get(contractName)) as any;
     if (contract === undefined) {
       return null;
     }
-    const abi =
-      contract.abi || (contract.contractInfo && contract.contractInfo.abi); // fallback for older version of buidler-deploy // TODO remove on 1.0.0
-    const abiWithAddedGas = addGasToAbiMethodsIfNecessary(
-      env.network.config,
-      abi
-    );
     return getContractAt(
       env,
-      ethers,
-      abiWithAddedGas,
+      contract.abi,
       contract.address,
       signer
     );
@@ -199,7 +348,6 @@ export async function getContractOrNull(
   );
 }
 
-// taken from : https://github.com/nomiclabs/buidler/pull/648/files
 // This helper adds a `gas` field to the ABI function elements if the network
 // is set up to use a fixed amount of gas.
 // This is done so that ethers doesn't automatically estimate gas limits on
@@ -208,19 +356,18 @@ function addGasToAbiMethodsIfNecessary(
   networkConfig: NetworkConfig,
   abi: any[]
 ): any[] {
+  const { BigNumber } = require("ethers") as typeof ethers;
+
   if (networkConfig.gas === "auto" || networkConfig.gas === undefined) {
     return abi;
   }
 
-  // ethers adds 21000 to whatever the abi `gas` field has.
-  // see https://github.com/ethers-io/ethers.js/blob/1a4f7d1b53050b69a85b1afbab11a2761f22f5bb/packages/contracts/src.ts/index.ts#L208-L211
-  // This may lead to OOG errors, as people may set the default gas to the same value as the
-  // block gas limit, especially on Buidler EVM.
+  // ethers adds 21000 to whatever the abi `gas` field has. This may lead to
+  // OOG errors, as people may set the default gas to the same value as the
+  // block gas limit, especially on Hardhat Network.
   // To avoid this, we substract 21000.
-   // HOTFIX: We substract 1M for now. See: https://github.com/ethers-io/ethers.js/issues/1058#issuecomment-703175279 
-  const gasLimit = BigNumber.from(networkConfig.gas)
-    .sub(1000000)
-    .toHexString();
+  // HOTFIX: We substract 1M for now. See: https://github.com/ethers-io/ethers.js/issues/1058#issuecomment-703175279
+  const gasLimit = BigNumber.from(networkConfig.gas).sub(1000000).toHexString();
 
   const modifiedAbi: any[] = [];
 
@@ -232,9 +379,26 @@ function addGasToAbiMethodsIfNecessary(
 
     modifiedAbi.push({
       ...abiElement,
-      gas: gasLimit
+      gas: gasLimit,
     });
   }
 
   return modifiedAbi;
+}
+
+function linkBytecode(artifact: Artifact, libraries: Link[]): string {
+  let bytecode = artifact.bytecode;
+
+  // TODO: measure performance impact
+  for (const { sourceName, libraryName, address } of libraries) {
+    const linkReferences = artifact.linkReferences[sourceName][libraryName];
+    for (const { start, length } of linkReferences) {
+      bytecode =
+        bytecode.substr(0, 2 + start * 2) +
+        address.substr(2) +
+        bytecode.substr(2 + (start + length) * 2);
+    }
+  }
+
+  return bytecode;
 }

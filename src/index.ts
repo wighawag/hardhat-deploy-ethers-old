@@ -1,32 +1,39 @@
-import "./type-extensions";
+import type EthersT from "ethers";
 import { extendEnvironment } from "hardhat/config";
 import { lazyObject } from "hardhat/plugins";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-import {
-  getContract,
-  getContractOrNull,
-  getContractAt,
-  getContractFactory,
-  getSigners,
-  getSigner
-} from "./helpers";
 
+import { getContractAt, getContractFactory, getSigners, getSigner, getContract, getContractOrNull } from "./helpers";
+import "./type-extensions";
 
-extendEnvironment((env: HardhatRuntimeEnvironment) => {
-  env.ethers = lazyObject(() => {
-    const ethers = require("ethers");
-    const { Web3Provider } = ethers.providers;
+extendEnvironment((hre) => {
+  hre.ethers = lazyObject(() => {
+    const { EthersProviderWrapper } = require("./ethers-provider-wrapper");
+
+    const { ethers } = require("ethers") as typeof EthersT;
+
     return {
-      provider: new Web3Provider(env.network.provider),
+      ...ethers,
 
-      getSigners: async () => getSigners(env),
-      getSigner: getSigner.bind(null, env),
+      // The provider wrapper should be removed once this is released
+      // https://github.com/nomiclabs/hardhat/pull/608
+      provider: new EthersProviderWrapper(hre.network.provider),
+
       // We cast to any here as we hit a limitation of Function#bind and
       // overloads. See: https://github.com/microsoft/TypeScript/issues/28582
-      getContractFactory: getContractFactory.bind(null, env, ethers) as any,
-      getContractAt: getContractAt.bind(null, env, ethers),
-      getContract: getContract.bind(null, env, ethers),
-      getContractOrNull: getContractOrNull.bind(null, env, ethers)
+      getContractFactory: getContractFactory.bind(null, hre) as any,
+      getContractAt: getContractAt.bind(null, hre),
+      
+      getSigners: async () => getSigners(hre),
+      getSigner: async(address) => getSigner(hre, address),
+
+      getContract: async (
+        name,
+        signer
+      ) => getContract(hre, name, signer),
+      getContractOrNull: async (
+        name,
+        signer
+      ) => getContractOrNull(hre, name, signer),
     };
   });
 });

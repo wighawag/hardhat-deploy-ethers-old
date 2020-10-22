@@ -1,6 +1,6 @@
 {
   "name": "buidler-ethers-v5",
-  "version": "0.3.0-hardhat.1",
+  "version": "0.3.0-hardhat.2",
   "description": "Hardhat plugin for ethers v5",
   "homepage": "https://github.com/wighawag/buidler-ethers-v5",
   "repository": "github:wighawag/buidler-ethers-v5",
@@ -27,7 +27,7 @@
     "@types/node": "^8.10.38",
     "chai": "^4.2.0",
     "ethers": "^5.0.0",
-    "hardhat": "^2.0.0-rc.0",
+    "hardhat": "^2.0.0-rc.1",
     "mocha": "^5.2.0",
     "prettier": "^1.17.0",
     "source-map-support": "^0.5.12",
@@ -40,7 +40,7 @@
   },
   "peerDependencies": {
     "ethers": "^5.0.0-beta.159",
-    "hardhat": "^2.0.0-rc.0"
+    "hardhat": "^2.0.0-rc.1"
   },
   "scripts": {
     "lint:fix": "prettier --write 'src/**/*.{js,ts}' 'test/**/*.{js,ts}' && tslint --fix --config tslint.json --project tsconfig.json",
