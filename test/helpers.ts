@@ -1,5 +1,6 @@
 import { resetHardhatContext } from "hardhat/plugins-testing";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import path from "path";
 
 declare module "mocha" {
   interface Context {
@@ -7,16 +8,18 @@ declare module "mocha" {
   }
 }
 
-export function useEnvironment(projectPath: string) {
-  beforeEach("Loading hardhat environment", function() {
-    process.chdir(projectPath);
-    process.env.HARDHAT_NETWORK = "localhost";
+export function useEnvironment(
+  fixtureProjectName: string,
+  networkName = "localhost"
+) {
+  beforeEach("Loading hardhat environment", function () {
+    process.chdir(path.join(__dirname, "fixture-projects", fixtureProjectName));
+    process.env.HARDHAT_NETWORK = networkName;
 
     this.env = require("hardhat");
   });
 
-  afterEach("Resetting hardhate", function() {
-    delete process.env.HARDHAT_NETWORK;
+  afterEach("Resetting hardhat", function () {
     resetHardhatContext();
   });
 }
