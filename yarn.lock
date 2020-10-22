@@ -1573,7 +1573,7 @@ growl@1.10.5:
   resolved "https://registry.yarnpkg.com/growl/-/growl-1.10.5.tgz#f2735dc2283674fa67478b10181059355c369e5e"
   integrity sha512-qBr4OuELkhPenW6goKVXiv47US3clb3/IbuWF9KNKEijAy9oeHxU9IgzjvJhHkUzhaj7rOUD7+YGWqUjLp5oSA==
 
-hardhat@^2.0.0-rc.1:
+hardhat@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/hardhat/-/hardhat-2.0.0.tgz#d2d5fcbcdbb9b6ec13e7c8e93706ddf0e5ac2a70"
   integrity sha512-kwl4fTn5jU4n3rlT1PucKETZ6qWzZiGgcUAqoqLc2ZADbcm1N9KUCbKzleidvgn+gTYcvVkhPTskkU2Yop6Lag==
