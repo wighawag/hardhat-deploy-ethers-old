@@ -1,26 +1,26 @@
-[![npm](https://img.shields.io/npm/v/@nomiclabs/buidler-ethers.svg)](https://www.npmjs.com/package/@nomiclabs/buidler-ethers)
-[![buidler](https://buidler.dev/buidler-plugin-badge.svg?1)](https://buidler.dev)
+[![hardhat](https://hardhat.org/hardhat-plugin-badge.svg?1)](https://hardhat.org)
 
-# buidler-ethers-v5
+# hardhat-deploy-ethers
 
-[Buidler](http://getbuidler.com) plugin for integration with [ethers.js](https://github.com/ethers-io/ethers.js/) version 5.
+[Hardhat](https://hardhat.org) plugin for integration with [ethers.js](https://github.com/ethers-io/ethers.js/).
 
 ## What
 
-This plugin brings to Buidler the Ethereum library `ethers.js`, version 5, which allows you to interact with the Ethereum blockchain in a simple way.
+This plugin brings to Hardhat the Ethereum library `ethers.js`, which allows you to interact with the Ethereum blockchain in a simple way.
 
-it is in based on the existing effort by @nomicalbas : `@nomiclabas/buidler-ethers`
+it is in based on the existing effort by @nomicalbas : `@nomiclabas/hardhat-ethers`
+And add extra functionality and the ability to get signer from address string
 
 ## Installation
 
 ```bash
-npm install --save-dev buidler-ethers-v5 ethers
+npm install --save-dev hardhat-deploy-ethers ethers
 ```
 
-And add the following statement to your `buidler.config.js`:
+And add the following statement to your `hardhat.config.ts`:
 
-```js
-usePlugin("buidler-ethers-v5");
+```ts
+import "hardhat-deploy-ethers"
 ```
 
 ## Tasks
@@ -29,10 +29,10 @@ This plugin creates no additional tasks.
 
 ## Environment extensions
 
-This plugins adds an `ethers` object to the Buidler Runtime Environment.
+This plugins adds an `ethers` object to the Hardhat Runtime Environment.
 
-This object has add some extra Buidler-specific functionality.
-But contrary to `@nomiclabas/buidler-ethers` it does not add ethers field that can already be accessed via the ethers library itself as import
+This object has add some extra `hardhat-deploy` specific functionality.
+<!-- But contrary to `@nomiclabas/hardhat-ethers` it does not add ethers field that can already be accessed via the ethers library itself as import -->
 
 ### Provider object
 
@@ -55,6 +55,7 @@ function getSigners() => Promise<ethers.Signer[]>;
 function getSigner(address: string) => Promise<ethers.Signer>;
 
 function getContract(deploymentName: string, signer?: ethers.Signer | string): Promise<ethers.Contract>;
+function getContractOrNull(deploymentName: string, signer?: ethers.Signer | string): Promise<ethers.Contract | null>;
 ```
 
 The `Contract`s and `ContractFactory`s returned by these helpers are connected to the first signer returned by `getSigners` be default.
@@ -63,17 +64,11 @@ The `Contract`s and `ContractFactory`s returned by these helpers are connected t
 
 There are no additional steps you need to take for this plugin to work.
 
-Install it and access ethers through the Buidler Runtime Environment anywhere you need it (tasks, scripts, tests, etc). For example, in your `buidler.config.js`:
+Install it and access ethers through the Hardhat Runtime Environment anywhere you need it (tasks, scripts, tests, etc). For example, in your `hardhat.config.js`:
 
-It also automatically integrate with the `buidler-deploy` plugin if detected 
+It also automatically integrate with the `hardhat-deploy` plugin if detected 
 
-```js
-...
-const contract await bre.ethers.getContract('<deploymentName>');
-...
+```ts
+const contract = await hre.ethers.getContract('<deploymentName>');
 ```
 
-
-## TypeScript support
-
-You need to add this to your `tsconfig.json`'s `files` array: `"node_modules/buidler-ethers-v5/src/type-extensions.d.ts"`

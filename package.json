@@ -1,9 +1,9 @@
 {
-  "name": "buidler-ethers-v5",
-  "version": "0.3.0-hardhat.2",
-  "description": "Hardhat plugin for ethers v5",
-  "homepage": "https://github.com/wighawag/buidler-ethers-v5",
-  "repository": "github:wighawag/buidler-ethers-v5",
+  "name": "hardhat-deploy-ethers",
+  "version": "0.3.0-beta.3",
+  "description": "Hardhat plugin for ethers that plays well with hardhat-deploy",
+  "homepage": "https://github.com/wighawag/hardhat-deploy-ethers",
+  "repository": "github:wighawag/hardhat-deploy-ethers",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -12,6 +12,7 @@
     "smart-contracts",
     "hardhat",
     "hardhat-plugin",
+    "hardhat-deploy",
     "ethers.js"
   ],
   "files": [
@@ -39,7 +40,7 @@
     "typescript": "^3.4.5"
   },
   "peerDependencies": {
-    "ethers": "^5.0.0-beta.159",
+    "ethers": "^5.0.0",
     "hardhat": "^2.0.0-rc.1"
   },
   "scripts": {
@@ -48,7 +49,8 @@
     "test": "mocha --timeout 20000 --exit",
     "build": "tsc",
     "watch": "tsc -w",
-    "publish:hardhat": "npm publish --tag hardhat",
+    "publish:next": "npm publish --tag next",
+    "publish:release": "npm publish",
     "prepublishOnly": "npm run build"
   }
 }

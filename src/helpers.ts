@@ -23,7 +23,7 @@ export interface FactoryOptions {
   libraries?: Libraries;
 }
 
-const pluginName = "buidler-ethers-v5";
+const pluginName = "hardhat-deploy-ethers";
 
 async function _getSigner(
   hre: HardhatRuntimeEnvironment,
@@ -344,7 +344,7 @@ export async function getContractOrNull(
     );
   }
   throw new Error(
-    `No Deployment Plugin Installed, try usePlugin("buidler-deploy")`
+    `No Deployment Plugin Installed, try 'import "harhdat-deploy"'`
   );
 }
 
