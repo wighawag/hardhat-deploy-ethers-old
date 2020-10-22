@@ -8,7 +8,7 @@
 
 This plugin brings to Hardhat the Ethereum library `ethers.js`, which allows you to interact with the Ethereum blockchain in a simple way.
 
-it is in based on the existing effort by @nomicalbas : `@nomiclabas/hardhat-ethers`
+it is in based on the existing effort by @nomiclabs : `@nomiclabs/hardhat-ethers`
 And add extra functionality and the ability to get signer from address string
 
 ## Installation
