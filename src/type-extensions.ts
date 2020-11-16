@@ -23,6 +23,12 @@ declare module "hardhat/types/runtime" {
     
     getSigners: () => Promise<SignerWithAddress[]>;
     getSigner: (address: string) => Promise<SignerWithAddress>;
+    getSignerOrNull: (address: string) => Promise<SignerWithAddress | null>;
+
+    getNamedSigners: () => Promise<Record<string, SignerWithAddress>>;
+    getNamedSigner: (name: string) => Promise<SignerWithAddress>;
+    getNamedSignerOrNull: (name: string) => Promise<SignerWithAddress | null>;
+    getUnnamedSigners: () => Promise<SignerWithAddress[]>;
 
     getContract: (
       name: string,

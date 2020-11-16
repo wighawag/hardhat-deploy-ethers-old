@@ -2,7 +2,7 @@ import type EthersT from "ethers";
 import { extendEnvironment } from "hardhat/config";
 import { lazyObject } from "hardhat/plugins";
 
-import { getContractAt, getContractFactory, getSigners, getSigner, getContract, getContractOrNull } from "./helpers";
+import { getContractAt, getContractFactory, getSigners, getSigner, getContract, getContractOrNull, getNamedSigners, getNamedSigner, getSignerOrNull, getNamedSignerOrNull, getUnnamedSigners } from "./helpers";
 import "./type-extensions";
 
 extendEnvironment((hre) => {
@@ -25,6 +25,13 @@ extendEnvironment((hre) => {
       
       getSigners: async () => getSigners(hre),
       getSigner: async(address) => getSigner(hre, address),
+      getSignerOrNull: async(address) => getSignerOrNull(hre, address),
+
+      getNamedSigners: async () => getNamedSigners(hre),
+      getNamedSigner: async(name) => getNamedSigner(hre, name),
+      getNamedSignerOrNull: async (name) => getNamedSignerOrNull(hre, name),
+      getUnnamedSigners: async () => getUnnamedSigners(hre),
+  
 
       getContract: async (
         name,

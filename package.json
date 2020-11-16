@@ -1,6 +1,6 @@
 {
   "name": "hardhat-deploy-ethers",
-  "version": "0.3.0-beta.5",
+  "version": "0.3.0-beta.6",
   "description": "Hardhat plugin for ethers that plays well with hardhat-deploy",
   "homepage": "https://github.com/wighawag/hardhat-deploy-ethers",
   "repository": "github:wighawag/hardhat-deploy-ethers",
@@ -22,6 +22,7 @@
     "README.md"
   ],
   "devDependencies": {
+    "@changesets/cli": "^2.11.2",
     "@types/chai": "^4.2.0",
     "@types/fs-extra": "^5.1.0",
     "@types/mocha": "^5.2.5",
