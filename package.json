@@ -5,6 +5,9 @@
   "homepage": "https://github.com/wighawag/hardhat-deploy-ethers",
   "repository": "github:wighawag/hardhat-deploy-ethers",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "keywords": [
