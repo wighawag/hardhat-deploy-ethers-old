@@ -41,7 +41,7 @@ async function _getSigner(
   } else if (typeof signer === "string") {
     ethersSigner = await SignerWithAddressImpl.create(hre.ethers.provider.getSigner(signer));
   } else {
-    ethersSigner =await SignerWithAddressImpl.create(signer)
+    ethersSigner = await SignerWithAddressImpl.create(signer)
   }
   return ethersSigner;
 }
@@ -122,7 +122,7 @@ export async function getNamedSigners(hre: HardhatRuntimeEnvironment): Promise<R
     return namedSigners;
   }
   throw new Error(
-    `No Deployment Plugin Installed, try 'import "harhdat-deploy"'`
+    `No Deployment Plugin Installed, try 'import "hardhat-deploy"'`
   ); 
 }
 
@@ -144,7 +144,7 @@ export async function getUnnamedSigners(hre: HardhatRuntimeEnvironment): Promise
     return unnamedSigners;
   }
   throw new Error(
-    `No Deployment Plugin Installed, try 'import "harhdat-deploy"'`
+    `No Deployment Plugin Installed, try 'import "hardhat-deploy"'`
   );
 }
 
@@ -164,7 +164,7 @@ export async function getNamedSignerOrNull(hre: HardhatRuntimeEnvironment, name:
     return null;
   }
   throw new Error(
-    `No Deployment Plugin Installed, try 'import "harhdat-deploy"'`
+    `No Deployment Plugin Installed, try 'import "hardhat-deploy"'`
   );
 }
 
@@ -450,7 +450,7 @@ export async function getContractOrNull(
     );
   }
   throw new Error(
-    `No Deployment Plugin Installed, try 'import "harhdat-deploy"'`
+    `No Deployment Plugin Installed, try 'import "hardhat-deploy"'`
   );
 }
 

@@ -11,7 +11,7 @@ declare module "hardhat/types/runtime" {
   type Libraries = LibrariesT;
   type FactoryOptions = FactoryOptionsT;
 
-  type EthersExtenstion = {
+  type EthersExtension = {
     provider: ethers.providers.JsonRpcProvider;
   
     getContractFactory: typeof getContractFactory;
@@ -70,6 +70,6 @@ declare module "hardhat/types/runtime" {
   ): Promise<ethers.ContractFactory>;
 
   interface HardhatRuntimeEnvironment {
-    ethers: EthersExtenstion;
+    ethers: EthersExtension;
   }
 }
